@@ -48,7 +48,7 @@ executables:
     dependencies:
     - academia
     - sqlite-simple
-    - gtk 
+    - gtk
 
 tests:
   academia-test:

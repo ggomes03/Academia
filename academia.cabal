@@ -39,7 +39,11 @@ library
 executable academia-exe
   main-is: Main.hs
   other-modules:
-      Plans
+      Alunos
+      Aulas
+      Ausencia
+      Frequencia
+      Plano
       Paths_academia
   hs-source-dirs:
       app
