@@ -12,6 +12,7 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad (when)
 import Control.Monad (void)
 import Text.Read (readMaybe)
+import Data.Maybe (isJust, fromJust)
 import System.IO.Error (ioeGetErrorString)
 
 import Tipos
@@ -152,15 +153,17 @@ mainInsert = do
         let maybeIdFrequencia = readMaybe idFrequenciaStr :: Maybe Int
             maybeIdAluno = readMaybe idAlunoStr :: Maybe Int
 
-        case (maybeIdFrequencia, maybeIdAluno) of
-            (Just idFrequencia, Just idAluno) -> do
-                let frequencia = Frequencia { idFrequencia = idFrequencia, idAlunoFrequen = idAluno, dataFrequen = dataFrequencia, indicPresen = indicPresen }
+        if isJust maybeIdFrequencia && isJust maybeIdAluno
+            then do
+                let idFrequencia = fromJust maybeIdFrequencia
+                    idAluno = fromJust maybeIdAluno
+                    frequencia = Frequencia { idFrequencia = idFrequencia, idAlunoFrequen = idAluno, dataFrequen = dataFrequencia, indicPresen = indicPresen }
                 conn <- open "db/academia.sqlite"
                 let query = fromString "INSERT INTO Frequencia (idFrequencia, idAluno, dataFreq, indicPresen) VALUES (?, ?, ?, ?)" :: Query
                 execute conn query (idFrequencia, idAluno, dataFrequencia, indicPresen)
                 close conn
                 putStrLn "Inserido com sucesso!"
-            _ -> do
+            else do
                 dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Erro: Valores inválidos nos campos 'ID Frequencia' ou 'ID Aluno'."
                 Gtk.dialogRun dialog
                 Gtk.widgetDestroy dialog

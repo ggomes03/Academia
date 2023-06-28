@@ -10,6 +10,8 @@ import qualified Graphics.UI.Gtk as Gtk
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad (when)
 import Control.Monad (void)
+import Text.Read (readMaybe)
+import Data.Maybe (isJust, fromJust)
 
 import Tipos
 
@@ -143,24 +145,31 @@ mainInsert = do
     addLabelAndEntry table 4 "Telefone:" foneEntry
 
     inserirButton `on` buttonActivated $ do
-        idAluno <- entryGetText idAlunoEntry >>= return . read
+        idAlunoText <- entryGetText idAlunoEntry
         nome <- entryGetText nomeEntry >>= return . fromString
         dataNascimento <- entryGetText dataNascimentoEntry >>= return . fromString
         email <- entryGetText emailEntry >>= return . fromString
         fone <- entryGetText foneEntry >>= return . fromString
-        let aluno = Aluno { idAluno = idAluno, nome = nome, dataNascimento = dataNascimento, email = email, fone = fone }
-        conn <- open "db/academia.sqlite"
-        let query = fromString "INSERT INTO Alunos (idAluno, nome, dataNascimento, email, fone) VALUES (?, ?, ?, ?, ?)" :: Query
-        execute conn query (idAluno, nome, dataNascimento, email, fone)
-        close conn
-        putStrLn "Inserido com sucesso!"
+
+        if any null [idAlunoText, nome, dataNascimento, email, fone]
+            then do
+                -- Mostrar um diálogo de erro
+                dialog <- messageDialogNew Nothing [] MessageError ButtonsClose "Por favor, preencha todos os campos!"
+                dialogRun dialog
+                widgetDestroy dialog
+            else do
+                let idAluno = read idAlunoText :: Int
+                let aluno = Aluno { idAluno = idAluno, nome = nome, dataNascimento = dataNascimento, email = email, fone = fone }
+                conn <- open "db/academia.sqlite"
+                let query = fromString "INSERT INTO Alunos (idAluno, nome, dataNascimento, email, fone) VALUES (?, ?, ?, ?, ?)" :: Query
+                execute conn query (idAluno, nome, dataNascimento, email, fone)
+                close conn
+                putStrLn "Inserido com sucesso!"
 
     -- Configurar ação do fechamento da janela
     window `on` deleteEvent $ do
         liftIO mainQuit
         return False
-
-
 
     widgetShowAll window
     mainGUI

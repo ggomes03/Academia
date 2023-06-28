@@ -136,16 +136,27 @@ mainInsert = do
     addLabelAndEntry table 3 "Preço:" precoEntry
 
     inserirButton `on` buttonActivated $ do
-        idPlano <- entryGetText idPlanoEntry >>= return . read
+        idPlanoText <- entryGetText idPlanoEntry
         nomePlano <- entryGetText nomePlanoEntry >>= return . fromString
         descricao <- entryGetText descricaoEntry >>= return . fromString
-        preco <- entryGetText precoEntry >>= return . read
-        let plano = Planos { idPlano = idPlano, nomePlano = nomePlano, descricao = descricao, preco = preco }
-        conn <- open "db/academia.sqlite"
-        let query = fromString "INSERT INTO Planos (idPlano, nome, descricao, preco) VALUES (?, ?, ?, ?)" :: Query
-        execute conn query (idPlano, nomePlano, descricao, preco)
-        close conn
-        putStrLn "Inserido com sucesso!"
+        precoText <- entryGetText precoEntry
+
+        if any null [idPlanoText, nomePlano, descricao, precoText]
+            then do
+                -- Mostrar um diálogo de erro
+                dialog <- messageDialogNew Nothing [] MessageError ButtonsClose "Por favor, preencha todos os campos!"
+                dialogRun dialog
+                widgetDestroy dialog
+            else do
+                let idPlano = read idPlanoText :: Int
+                    preco = read precoText :: Float
+                    plano = Planos { idPlano = idPlano, nomePlano = nomePlano, descricao = descricao, preco = preco }
+                conn <- open "db/academia.sqlite"
+                let query = fromString "INSERT INTO Planos (idPlano, nome, descricao, preco) VALUES (?, ?, ?, ?)" :: Query
+                execute conn query (idPlano, nomePlano, descricao, preco)
+                close conn
+                putStrLn "Inserido com sucesso!"
+
 
     -- Configurar ação do fechamento da janela
     window `on` deleteEvent $ do
