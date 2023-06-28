@@ -11,17 +11,7 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad (when)
 import Control.Monad (void)
 
-data PlanosInsert = PlanosInsert {idPlanoIns :: Int, nomePlanoIns :: String, descricaoIns :: String, precoIns :: Float }
-
-instance FromRow PlanosInsert where
-    fromRow = PlanosInsert <$> field <*> field <*> field <*> field
-
-instance Show PlanosInsert where
-    show (PlanosInsert idPlanoIns nomePlanoIns descricaoIns precoIns) =
-        "Plano {Id = " ++ show idPlanoIns ++ 
-        ", nome = " ++ show nomePlanoIns ++
-        ", descricaoIns = " ++ show descricaoIns ++
-        ", precoIns = " ++ show precoIns ++ "}\n"
+import Tipos
 
 mainIns :: IO ()
 mainIns = do
@@ -55,7 +45,7 @@ mainIns = do
         nomePlano <- entryGetText nomePlanoEntry >>= return . fromString
         descricao <- entryGetText descricaoEntry >>= return . fromString
         preco <- entryGetText precoEntry >>= return . read
-        let plano = PlanosInsert { idPlanoIns = idPlano, nomePlanoIns = nomePlano, descricaoIns = descricao, precoIns = preco }
+        let plano = Planos { idPlano = idPlano, nomePlano = nomePlano, descricao = descricao, preco = preco }
         conn <- open "db/academia.sqlite"
         let query = fromString "INSERT INTO Planos (idPlano, nome, descricao, preco) VALUES (?, ?, ?, ?)" :: Query
         execute conn query (idPlano, nomePlano, descricao, preco)
@@ -66,8 +56,6 @@ mainIns = do
     window `on` deleteEvent $ do
         liftIO mainQuit
         return False
-
-
 
     widgetShowAll window
     mainGUI

@@ -10,19 +10,8 @@ import qualified Graphics.UI.Gtk as Gtk
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad (void)
 
+import Tipos
 import PlanoInsert
-
-data Planos = Planos {idPlano :: Int, nomePlano :: String, descricao :: String, preco :: Float }
-
-instance FromRow Planos where
-    fromRow = Planos <$> field <*> field <*> field <*> field
-
-instance Show Planos where
-    show (Planos idPlano nomePlano descricao preco) =
-        "Plano {Id = " ++ show idPlano ++ 
-        ", nome = " ++ show nomePlano ++
-        ", descricao = " ++ show descricao ++
-        ", preco = " ++ show preco ++ "}\n"
 
 -- Função para criar a tabela com os dados
 createTable :: [Planos] -> IO Widget

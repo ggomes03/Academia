@@ -11,19 +11,9 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad (when)
 import Control.Monad (void)
 
+import Tipos
 import FrequenciaInsert
 
-data Frequencia = Frequencia {idFrequencia :: Int, idAluno :: Int, dataFrequen :: String, indicPresen :: String }
-
-instance FromRow Frequencia where
-    fromRow = Frequencia <$> field <*> field <*> field <*> field
-
-instance Show Frequencia where
-    show (Frequencia idFrequencia idAluno dataFrequen indicPresen) =
-        "Plano {Id = " ++ show idFrequencia ++ 
-        ", nome = " ++ show idAluno ++
-        ", descricao = " ++ show dataFrequen ++
-        ", preco = " ++ show indicPresen ++ "}\n"
 
 -- Função para criar a tabela com os dados
 createTable :: [Frequencia] -> IO Widget
@@ -68,7 +58,7 @@ createTable frequencia = do
     cellLayoutSetAttributes columnIdFrequencia rendererIdFrequencia store $ \row ->
         [cellText Gtk.:= show (idFrequencia row)]
     cellLayoutSetAttributes columnIdAluno rendererIdAluno store $ \row ->
-        [cellText Gtk.:= show (idAluno row)]
+        [cellText Gtk.:= show (idAlunoFrequen row)]
     cellLayoutSetAttributes columnDataFrequencia rendererDataFrequencia store $ \row ->
         [cellText Gtk.:= dataFrequen row]
     cellLayoutSetAttributes columnIndicPresen rendererIndicPresen store $ \row ->

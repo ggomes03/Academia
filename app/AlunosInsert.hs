@@ -11,18 +11,7 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad (when)
 import Control.Monad (void)
 
-data AlunoInsert = AlunoInsert { idAlunoIns :: Int, nomeIns :: String, dataNascimentoIns :: String, emailIns :: String, foneIns :: String }
-
-instance FromRow AlunoInsert where
-    fromRow = AlunoInsert <$> field <*> field <*> field  <*> field <*> field
-
-instance Show AlunoInsert where
-    show (AlunoInsert idAlunoIns nomeIns dataNascimentoIns emailIns foneIns) =
-        "Aluno {Id = " ++ show idAlunoIns ++
-        ", nome = " ++ show nomeIns ++
-        ", dataNascimento = " ++ show dataNascimentoIns ++
-        ", email = " ++ show emailIns ++
-        ", fone = " ++ show foneIns ++ "}\n"
+import Tipos
 
 mainIns :: IO ()
 mainIns = do
@@ -59,7 +48,7 @@ mainIns = do
         dataNascimento <- entryGetText dataNascimentoEntry >>= return . fromString
         email <- entryGetText emailEntry >>= return . fromString
         fone <- entryGetText foneEntry >>= return . fromString
-        let aluno = AlunoInsert { idAlunoIns = idAluno, nomeIns = nome, dataNascimentoIns = dataNascimento, emailIns = email, foneIns = fone }
+        let aluno = Aluno { idAluno = idAluno, nome = nome, dataNascimento = dataNascimento, email = email, fone = fone }
         conn <- open "db/academia.sqlite"
         let query = fromString "INSERT INTO Alunos (idAluno, nome, dataNascimento, email, fone) VALUES (?, ?, ?, ?, ?)" :: Query
         execute conn query (idAluno, nome, dataNascimento, email, fone)

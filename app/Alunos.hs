@@ -12,20 +12,9 @@ import Control.Monad (when)
 import Control.Monad (void)
 
 import AlunosInsert
+import Tipos
 
 
-data Aluno = Aluno {idAluno :: Int, nome :: String, dataNascimento :: String, email :: String, fone :: String}
-
-instance FromRow Aluno where
-    fromRow = Aluno <$> field <*> field <*> field  <*> field <*> field
-
-instance Show Aluno where
-    show (Aluno idAluno nome dataNascimento email fone) =
-        "Aluno {Id = " ++ show idAluno ++
-        ", nome = " ++ show nome ++
-        ", dataNascimento = " ++ show dataNascimento ++
-        ", email = " ++ show email ++
-        ", fone = " ++ show fone ++ "}\n"
 
 -- Função para criar a tabela com os dados
 createTable :: [Aluno] -> IO Widget

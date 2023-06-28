@@ -11,18 +11,7 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad (when)
 import Control.Monad (void)
 
-data AulasInsert = AulasInsert { idAulaIns :: Int, nomeAulaIns :: String, nomeInstrutorIns :: String, horarioAulaIns :: Int }
-
-instance FromRow AulasInsert where
-    fromRow = AulasInsert <$> field <*> field <*> field  <*> field
-
-instance Show AulasInsert where
-    show (AulasInsert idAulaIns nomeAulaIns nomeInstrutorIns horarioAulaIns) =
-        "Aula {Id = " ++ show idAulaIns ++
-        ", nome = " ++ show nomeAulaIns ++
-        ", Instrutor = " ++ show nomeInstrutorIns ++
-        ", Hora = " ++ show horarioAulaIns ++
-        "}\n"
+import Tipos 
 
 mainIns :: IO ()
 mainIns = do
@@ -83,7 +72,7 @@ mainIns = do
                 Gtk.widgetDestroy dialog
                 putStrLn "Erro: Todos os campos devem ser preenchidos."
             else do
-                let aula = AulasInsert { idAulaIns = idAula, nomeAulaIns = nomeAula, nomeInstrutorIns = nomeInstrutor, horarioAulaIns = horarioAula }
+                let aula = Aulas { idAula = idAula, nomeAula = nomeAula, nomeInstrutor = nomeInstrutor, horarioAula = horarioAula }
                 conn <- open "db/academia.sqlite"
                 let query = fromString "INSERT INTO Aulas (idAula, nomeAula, nomeInstrutor, horarioAula) VALUES (?, ?, ?, ?)" :: Query
                 execute conn query (idAula, nomeAula, nomeInstrutor, horarioAula)

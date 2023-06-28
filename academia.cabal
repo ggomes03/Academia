@@ -47,6 +47,7 @@ executable academia-exe
       FrequenciaInsert
       Plano
       PlanoInsert
+      Tipos
       Paths_academia
   hs-source-dirs:
       app

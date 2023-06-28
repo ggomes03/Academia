@@ -12,17 +12,7 @@ import Control.Monad (when)
 import Control.Monad (void)
 import AulasInsert
 
-data Aulas = Aulas {idAula :: Int, nomeAula :: String, nomeInstrutor :: String, horarioAula :: Int}
-
-instance FromRow Aulas where
-    fromRow = Aulas <$> field <*> field <*> field  <*> field 
-    
-instance Show Aulas where
-    show (Aulas idAula nomeAula nomeInstrutor horarioAula) =
-        "Aluno {Id = " ++ show idAula ++
-        ", Aula = " ++ show nomeAula ++
-        ", Instrutor = " ++ show nomeInstrutor ++
-        ", Hora = " ++ show horarioAula ++ "}\n"
+import Tipos
 
 createTable :: [Aulas] -> IO Widget
 createTable aulas = do

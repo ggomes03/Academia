@@ -3,8 +3,8 @@ module FrequenciaInsert where
 import Lib
 import Control.Applicative  
 import Database.SQLite.Simple
-import Data.String (fromString)
 import Database.SQLite.Simple.FromRow
+import Data.String (fromString)
 import Graphics.UI.Gtk hiding (set)
 import qualified Graphics.UI.Gtk as Gtk
 import Control.Exception
@@ -14,18 +14,7 @@ import Control.Monad (void)
 import Text.Read (readMaybe)
 import System.IO.Error (ioeGetErrorString)
 
-
-data FrequenciaIns = FrequenciaIns {idFrequenciaIns :: Int, idAlunoIns :: Int, dataFrequenIns :: String, indicPresenIns :: String }
-
-instance FromRow FrequenciaIns where
-    fromRow = FrequenciaIns <$> field <*> field <*> field <*> field
-
-instance Show FrequenciaIns where
-    show (FrequenciaIns idFrequenciaIns idAlunoIns dataFrequenIns indicPresenIns) =
-        "Plano {Id = " ++ show idFrequenciaIns ++ 
-        ", nome = " ++ show idAlunoIns ++
-        ", descricao = " ++ show dataFrequenIns ++
-        ", preco = " ++ show indicPresenIns ++ "}\n"
+import Tipos 
 
 mainIns :: IO ()
 mainIns = do
@@ -65,7 +54,7 @@ mainIns = do
 
         case (maybeIdFrequencia, maybeIdAluno) of
             (Just idFrequencia, Just idAluno) -> do
-                let frequencia = FrequenciaIns { idFrequenciaIns = idFrequencia, idAlunoIns = idAluno, dataFrequenIns = dataFrequencia, indicPresenIns = indicPresen }
+                let frequencia = Frequencia { idFrequencia = idFrequencia, idAlunoFrequen = idAluno, dataFrequen = dataFrequencia, indicPresen = indicPresen }
                 conn <- open "db/academia.sqlite"
                 let query = fromString "INSERT INTO Frequencia (idFrequencia, idAluno, dataFreq, indicPresen) VALUES (?, ?, ?, ?)" :: Query
                 execute conn query (idFrequencia, idAluno, dataFrequencia, indicPresen)
@@ -80,8 +69,6 @@ mainIns = do
     window `on` deleteEvent $ do
         liftIO mainQuit
         return False
-
-
 
     widgetShowAll window
     mainGUI
