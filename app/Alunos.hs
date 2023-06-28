@@ -12,6 +12,7 @@ import Control.Monad (when)
 import Control.Monad (void)
 import Text.Read (readMaybe)
 import Data.Maybe (isJust, fromJust)
+import Graphics.UI.Gtk hiding (Action, backspace)
 
 import Tipos
 
@@ -83,17 +84,15 @@ main = do
     
     window <- windowNew
     Gtk.set window [Gtk.windowTitle Gtk.:= "Academia", Gtk.containerBorderWidth Gtk.:= 10]
-    -- window `on` sizeRequest $ return (Requisition 1000 600)
 
     buttonInsert <- buttonNewWithLabel "Inserir novo Aluno"
-
-    -- buttonInsert `on` buttonActivated $ AlunosInsert.mainIns
+    -- widgetSetSizeRequest buttonInsert 100 30
 
     buttonInsert `on` buttonActivated $ do
         widgetDestroy window
         mainInsert
         
-    box <- vBoxNew False 10
+    box <- vBoxNew False 0 
     Gtk.set box [containerBorderWidth Gtk.:= 10, boxHomogeneous Gtk.:= True, boxSpacing Gtk.:= 10]
 
     conn <- open "db/academia.sqlite"
@@ -101,6 +100,10 @@ main = do
     results <- query_ conn query :: IO [Aluno]
     table <- createTable results
     close conn 
+
+
+
+    boxPackStart box buttonInsert PackNatural 0
 
     containerAdd box buttonInsert
     containerAdd box table
@@ -123,7 +126,7 @@ mainInsert = do
     Gtk.set window [ windowTitle Gtk.:= "Academia", containerBorderWidth Gtk.:= 10 ]
 
     -- Criar widgets
-    idAlunoEntry <- entryNew
+    -- idAlunoEntry <- entryNew
     nomeEntry <- entryNew
     dataNascimentoEntry <- entryNew
     emailEntry <- entryNew
@@ -138,31 +141,31 @@ mainInsert = do
     boxPackStart vbox inserirButton PackNatural 0
 
     -- Adicionar labels e entries à tabela
-    addLabelAndEntry table 0 "ID:" idAlunoEntry
+    -- addLabelAndEntry table 0 "ID:" idAlunoEntry
     addLabelAndEntry table 1 "Nome:" nomeEntry
     addLabelAndEntry table 2 "Data de Nascimento:" dataNascimentoEntry
     addLabelAndEntry table 3 "Email:" emailEntry
     addLabelAndEntry table 4 "Telefone:" foneEntry
 
     inserirButton `on` buttonActivated $ do
-        idAlunoText <- entryGetText idAlunoEntry
+        -- idAlunoText <- entryGetText idAlunoEntry
         nome <- entryGetText nomeEntry >>= return . fromString
         dataNascimento <- entryGetText dataNascimentoEntry >>= return . fromString
         email <- entryGetText emailEntry >>= return . fromString
         fone <- entryGetText foneEntry >>= return . fromString
 
-        if any null [idAlunoText, nome, dataNascimento, email, fone]
+        if any null [nome, dataNascimento, email, fone]
             then do
                 -- Mostrar um diálogo de erro
                 dialog <- messageDialogNew Nothing [] MessageError ButtonsClose "Por favor, preencha todos os campos!"
                 dialogRun dialog
                 widgetDestroy dialog
             else do
-                let idAluno = read idAlunoText :: Int
-                let aluno = Aluno { idAluno = idAluno, nome = nome, dataNascimento = dataNascimento, email = email, fone = fone }
+                -- let idAluno = read idAlunoText :: Int
+                let aluno = Aluno { idAluno = 0, nome = nome, dataNascimento = dataNascimento, email = email, fone = fone }
                 conn <- open "db/academia.sqlite"
-                let query = fromString "INSERT INTO Alunos (idAluno, nome, dataNascimento, email, fone) VALUES (?, ?, ?, ?, ?)" :: Query
-                execute conn query (idAluno, nome, dataNascimento, email, fone)
+                let query = fromString "INSERT INTO Alunos (nome, dataNascimento, email, fone) VALUES (?, ?, ?, ?)" :: Query
+                execute conn query (nome, dataNascimento, email, fone)
                 close conn
                 putStrLn "Inserido com sucesso!"
 
