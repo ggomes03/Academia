@@ -10,6 +10,8 @@ import qualified Graphics.UI.Gtk as Gtk
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad (void)
 
+import PlanoInsert
+
 data Planos = Planos {idPlano :: Int, nomePlano :: String, descricao :: String, preco :: Float }
 
 instance FromRow Planos where
@@ -85,9 +87,13 @@ main = do
     Gtk.set window [Gtk.windowTitle Gtk.:= "Academia", Gtk.containerBorderWidth Gtk.:= 10]
 
     buttonInsert <- buttonNewWithLabel "Inserir novo plano"
+    widgetSetSizeRequest buttonInsert 100 50
 
     box <- vBoxNew False 10
     Gtk.set box [containerBorderWidth Gtk.:= 10, boxHomogeneous Gtk.:= True, boxSpacing Gtk.:= 10]
+
+    buttonInsert `on` buttonActivated $ do 
+        PlanoInsert.mainIns
 
     -- Cria a tabela
     conn <- open "db/academia.sqlite"

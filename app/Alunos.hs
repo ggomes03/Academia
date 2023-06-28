@@ -11,6 +11,8 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad (when)
 import Control.Monad (void)
 
+import AlunosInsert
+
 
 data Aluno = Aluno {idAluno :: Int, nome :: String, dataNascimento :: String, email :: String, fone :: String}
 
@@ -97,6 +99,12 @@ main = do
 
     buttonInsert <- buttonNewWithLabel "Inserir novo Aluno"
 
+    -- buttonInsert `on` buttonActivated $ AlunosInsert.mainIns
+
+    buttonInsert `on` buttonActivated $ do
+        -- widgetDestroy window
+        AlunosInsert.mainIns
+        
     box <- vBoxNew False 10
     Gtk.set box [containerBorderWidth Gtk.:= 10, boxHomogeneous Gtk.:= True, boxSpacing Gtk.:= 10]
 

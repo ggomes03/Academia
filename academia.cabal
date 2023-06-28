@@ -40,10 +40,13 @@ executable academia-exe
   main-is: Main.hs
   other-modules:
       Alunos
+      AlunosInsert
       Aulas
-      Ausencia
+      AulasInsert
       Frequencia
+      FrequenciaInsert
       Plano
+      PlanoInsert
       Paths_academia
   hs-source-dirs:
       app

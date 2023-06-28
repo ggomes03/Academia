@@ -10,18 +10,19 @@ import qualified Graphics.UI.Gtk as Gtk
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad (when)
 import Control.Monad (void)
+import AulasInsert
 
-data Aulas = Aulas {idAula :: Int, nomeAula :: String, nomeInstrutor :: String, horarioAula :: String}
+data Aulas = Aulas {idAula :: Int, nomeAula :: String, nomeInstrutor :: String, horarioAula :: Int}
 
 instance FromRow Aulas where
     fromRow = Aulas <$> field <*> field <*> field  <*> field 
-
+    
 instance Show Aulas where
     show (Aulas idAula nomeAula nomeInstrutor horarioAula) =
         "Aluno {Id = " ++ show idAula ++
-        ", nome = " ++ show nomeAula ++
-        ", dataNascimento = " ++ show nomeInstrutor ++
-        ", email = " ++ show horarioAula ++ "}\n"
+        ", Aula = " ++ show nomeAula ++
+        ", Instrutor = " ++ show nomeInstrutor ++
+        ", Hora = " ++ show horarioAula ++ "}\n"
 
 createTable :: [Aulas] -> IO Widget
 createTable aulas = do
@@ -89,9 +90,17 @@ main = do
     Gtk.set window [Gtk.windowTitle Gtk.:= "Academia", Gtk.containerBorderWidth Gtk.:= 10]
 
     buttonInsert <- buttonNewWithLabel "Inserir nova Aula"
+    widgetSetSizeRequest buttonInsert 100 50
 
     box <- vBoxNew False 10
     Gtk.set box [containerBorderWidth Gtk.:= 10, boxHomogeneous Gtk.:= True, boxSpacing Gtk.:= 10]
+
+
+    buttonInsert `on` buttonActivated $ do
+        -- widgetDestroy window
+        AulasInsert.mainIns
+        
+        
 
     -- Cria a tabela
     conn <- open "db/academia.sqlite"
