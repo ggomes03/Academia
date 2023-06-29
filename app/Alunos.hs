@@ -167,6 +167,12 @@ mainInsert = do
                 let query = fromString "INSERT INTO Alunos (nome, dataNascimento, email, fone) VALUES (?, ?, ?, ?)" :: Query
                 execute conn query (nome, dataNascimento, email, fone)
                 close conn
+
+                dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Aluno Inserido!"
+                dialogRun dialog
+                widgetDestroy dialog
+
+
                 putStrLn "Inserido com sucesso!"
 
     -- Configurar ação do fechamento da janela

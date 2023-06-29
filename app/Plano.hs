@@ -155,6 +155,10 @@ mainInsert = do
                 let query = fromString "INSERT INTO Planos (idPlano, nome, descricao, preco) VALUES (?, ?, ?, ?)" :: Query
                 execute conn query (idPlano, nomePlano, descricao, preco)
                 close conn
+
+                dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Plano Inserido!"
+                dialogRun dialog
+                widgetDestroy dialog
                 putStrLn "Inserido com sucesso!"
 
 

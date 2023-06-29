@@ -169,6 +169,9 @@ mainInsert = do
                 let query = fromString "INSERT INTO Aulas (idAula, nomeAula, nomeInstrutor, horarioAula) VALUES (?, ?, ?, ?)" :: Query
                 execute conn query (idAula, nomeAula, nomeInstrutor, horarioAula)
                 close conn
+                dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Aula Inserida!"
+                dialogRun dialog
+                widgetDestroy dialog
                 putStrLn "Inserido com sucesso!"
 
     backButton `on` buttonActivated $ do

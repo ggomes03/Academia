@@ -125,7 +125,6 @@ mainInsert = do
     Gtk.set window [ windowTitle Gtk.:= "Academia", containerBorderWidth Gtk.:= 10 ]
 
     -- Criar widgets
-    idFrequenciaEntry <- entryNew
     idAlunoEntry <- entryNew
     dataFrequenciaEntry <- entryNew
     indicPresenEntry <- entryNew
@@ -139,30 +138,30 @@ mainInsert = do
     boxPackStart vbox inserirButton PackNatural 0
 
     -- Adicionar labels e entries à tabela
-    addLabelAndEntry table 0 "ID Frequencia:" idFrequenciaEntry
     addLabelAndEntry table 1 "ID Aluno:" idAlunoEntry
     addLabelAndEntry table 2 "Data Frequencia:" dataFrequenciaEntry
     addLabelAndEntry table 3 "Presente: S ou N" indicPresenEntry
     
     inserirButton `on` buttonActivated $ do
-        idFrequenciaStr <- entryGetText idFrequenciaEntry
         idAlunoStr <- entryGetText idAlunoEntry
         dataFrequencia <- entryGetText dataFrequenciaEntry >>= return . fromString
         indicPresen <- entryGetText indicPresenEntry
 
-        let maybeIdFrequencia = readMaybe idFrequenciaStr :: Maybe Int
-            maybeIdAluno = readMaybe idAlunoStr :: Maybe Int
+        let maybeIdAluno = readMaybe idAlunoStr :: Maybe Int
 
-        if isJust maybeIdFrequencia && isJust maybeIdAluno
+        if isJust maybeIdAluno
             then do
-                let idFrequencia = fromJust maybeIdFrequencia
-                    idAluno = fromJust maybeIdAluno
-                    frequencia = Frequencia { idFrequencia = idFrequencia, idAlunoFrequen = idAluno, dataFrequen = dataFrequencia, indicPresen = indicPresen }
+                let idAluno = fromJust maybeIdAluno
+                    frequencia = Frequencia { idFrequencia = 0, idAlunoFrequen = idAluno, dataFrequen = dataFrequencia, indicPresen = indicPresen }
                 conn <- open "db/academia.sqlite"
-                let query = fromString "INSERT INTO Frequencia (idFrequencia, idAluno, dataFreq, indicPresen) VALUES (?, ?, ?, ?)" :: Query
-                execute conn query (idFrequencia, idAluno, dataFrequencia, indicPresen)
+                let query = fromString "INSERT INTO Frequencia (idAluno, dataFreq, indicPresen) VALUES ( ?, ?, ?)" :: Query
+                execute conn query (idAluno, dataFrequencia, indicPresen)
                 close conn
                 putStrLn "Inserido com sucesso!"
+
+                dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Frequencia Inserida!"
+                dialogRun dialog
+                widgetDestroy dialog
             else do
                 dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Erro: Valores inválidos nos campos 'ID Frequencia' ou 'ID Aluno'."
                 Gtk.dialogRun dialog
