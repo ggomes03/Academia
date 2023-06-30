@@ -81,7 +81,7 @@ createTable aulas = do
 runApp :: IO ()
 runApp = do
     window <- windowNew
-    Gtk.set window [Gtk.windowTitle Gtk.:= "Academia", Gtk.containerBorderWidth Gtk.:= 10]
+    Gtk.set window [Gtk.windowTitle Gtk.:= "Aulas", Gtk.containerBorderWidth Gtk.:= 10]
 
     buttonInsert <- buttonNewWithLabel "Inserir nova Aula"
 
@@ -116,10 +116,10 @@ mainInsert = do
     void initGUI
 
     window <- windowNew
-    Gtk.set window [ windowTitle Gtk.:= "Academia", containerBorderWidth Gtk.:= 10 ]
+    Gtk.set window [ windowTitle Gtk.:= "Inserir Aulas", containerBorderWidth Gtk.:= 10 ]
 
     -- Criar widgets
-    idAulaEntry <- entryNew
+    -- idAulaEntry <- entryNew
     nomeEntry <- entryNew
     nomeInstrutorEntry <- entryNew
     horarioAulaEntry <- entryNew
@@ -135,14 +135,14 @@ mainInsert = do
     boxPackStart vbox backButton PackNatural 0
 
     -- Adicionar labels e entries à tabela
-    addLabelAndEntry table 0 "ID:" idAulaEntry
+    -- addLabelAndEntry table 0 "ID:" idAulaEntry
     addLabelAndEntry table 1 "Nome:" nomeEntry
     addLabelAndEntry table 2 "Instrutor:" nomeInstrutorEntry
     addLabelAndEntry table 3 "Hora:" horarioAulaEntry
 
     inserirButton `on` buttonActivated $ do
-        idAulaStr <- entryGetText idAulaEntry
-        let idAula = read idAulaStr :: Int
+        -- idAulaStr <- entryGetText idAulaEntry
+        -- let idAula = read idAulaStr :: Int
         
         nomeAulaStr <- entryGetText nomeEntry
         let nomeAula = fromString nomeAulaStr
@@ -153,22 +153,22 @@ mainInsert = do
         horarioAulaStr <- entryGetText horarioAulaEntry
         let horarioAula = read horarioAulaStr :: Int
         
-        if any null [idAulaStr, nomeAulaStr, nomeInstrutorStr, horarioAulaStr]
+        if any null [nomeAulaStr, nomeInstrutorStr, horarioAulaStr]
             then do 
                 dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Erro: Nenhum campo pode estar vazio"
                 Gtk.dialogRun dialog
                 Gtk.widgetDestroy dialog
                 putStrLn "Erro: Todos os campos devem ser preenchidos."
             else do
-                let aula = Aulas { idAula = idAula, nomeAula = nomeAula, nomeInstrutor = nomeInstrutor, horarioAula = horarioAula }
+                let aula = Aulas { idAula = 0, nomeAula = nomeAula, nomeInstrutor = nomeInstrutor, horarioAula = horarioAula }
                 conn <- open "db/academia.sqlite"
-                let query = fromString "INSERT INTO Aulas (idAula, nomeAula, nomeInstrutor, horarioAula) VALUES (?, ?, ?, ?)" :: Query
-                execute conn query (idAula, nomeAula, nomeInstrutor, horarioAula)
+                let query = fromString "INSERT INTO Aulas ( nomeAula, nomeInstrutor, horarioAula) VALUES ( ?, ?, ?)" :: Query
+                execute conn query ( nomeAula, nomeInstrutor, horarioAula)
                 close conn
                 dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Aula Inserida!"
                 dialogRun dialog
                 widgetDestroy dialog
-                putStrLn "Inserido com sucesso!"
+            
 
     backButton `on` buttonActivated $ do
         widgetDestroy window

@@ -4,6 +4,7 @@ import Lib
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow
 import Data.String (fromString)
+import Data.Char (toUpper)
 import Graphics.UI.Gtk hiding (set)
 import qualified Graphics.UI.Gtk as Gtk
 import Control.Applicative  
@@ -83,7 +84,7 @@ runApp :: IO ()
 runApp = do 
 
     window <- windowNew
-    Gtk.set window [Gtk.windowTitle Gtk.:= "Academia", Gtk.containerBorderWidth Gtk.:= 10]
+    Gtk.set window [Gtk.windowTitle Gtk.:= "Frequencias", Gtk.containerBorderWidth Gtk.:= 10]
 
     buttonInsert <- buttonNewWithLabel "Inserir nova frequencia"
 
@@ -116,14 +117,15 @@ runApp = do
     widgetShowAll window
     mainGUI
 
-
+changeUpper :: String -> String
+changeUpper = map toUpper
 
 mainInsert :: IO ()
 mainInsert = do
     void initGUI
 
     window <- windowNew
-    Gtk.set window [ windowTitle Gtk.:= "Academia", containerBorderWidth Gtk.:= 10 ]
+    Gtk.set window [ windowTitle Gtk.:= "Inserir Frequencia", containerBorderWidth Gtk.:= 10 ]
 
     -- Criar widgets
     idAlunoEntry <- entryNew
@@ -150,12 +152,15 @@ mainInsert = do
     inserirButton `on` buttonActivated $ do
         idAlunoStr <- entryGetText idAlunoEntry
         dataFrequencia <- entryGetText dataFrequenciaEntry >>= return . fromString
-        indicPresen <- entryGetText indicPresenEntry
+        indicPresen <- entryGetText indicPresenEntry >>= return . changeUpper
+
+        
 
         let maybeIdAluno = readMaybe idAlunoStr :: Maybe Int
 
         if isJust maybeIdAluno
             then do
+
                 let idAluno = fromJust maybeIdAluno
                     frequencia = Frequencia { idFrequencia = 0, idAlunoFrequen = idAluno, dataFrequen = dataFrequencia, indicPresen = indicPresen }
                 conn <- open "db/academia.sqlite"

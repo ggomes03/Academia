@@ -76,7 +76,7 @@ main = do
 runApp :: IO ()
 runApp = do 
     window <- windowNew
-    Gtk.set window [Gtk.windowTitle Gtk.:= "Academia", Gtk.containerBorderWidth Gtk.:= 10]
+    Gtk.set window [Gtk.windowTitle Gtk.:= "Planos", Gtk.containerBorderWidth Gtk.:= 10]
 
 
     buttonInsert <- buttonNewWithLabel "Inserir novo plano"
@@ -114,10 +114,10 @@ mainInsert = do
     void initGUI
 
     window <- windowNew
-    Gtk.set window [ windowTitle Gtk.:= "Academia", containerBorderWidth Gtk.:= 10 ]
+    Gtk.set window [ windowTitle Gtk.:= "Inserir Plano", containerBorderWidth Gtk.:= 10 ]
 
     -- Criar widgets
-    idPlanoEntry <- entryNew
+    -- idPlanoEntry <- entryNew
     nomePlanoEntry <- entryNew
     descricaoEntry <- entryNew
     precoEntry <- entryNew
@@ -134,30 +134,30 @@ mainInsert = do
     boxPackStart vbox backButton PackNatural 0
 
     -- Adicionar labels e entries à tabela
-    addLabelAndEntry table 0 "ID:" idPlanoEntry
+    -- addLabelAndEntry table 0 "ID:" idPlanoEntry
     addLabelAndEntry table 1 "Nome:" nomePlanoEntry
     addLabelAndEntry table 2 "Descrição:" descricaoEntry
     addLabelAndEntry table 3 "Preço:" precoEntry
 
     inserirButton `on` buttonActivated $ do
-        idPlanoText <- entryGetText idPlanoEntry
+        -- idPlanoText <- entryGetText idPlanoEntry
         nomePlano <- entryGetText nomePlanoEntry >>= return . fromString
         descricao <- entryGetText descricaoEntry >>= return . fromString
         precoText <- entryGetText precoEntry
 
-        if any null [idPlanoText, nomePlano, descricao, precoText]
+        if any null [nomePlano, descricao, precoText]
             then do
                 -- Mostrar um diálogo de erro
                 dialog <- messageDialogNew Nothing [] MessageError ButtonsClose "Por favor, preencha todos os campos!"
                 dialogRun dialog
                 widgetDestroy dialog
             else do
-                let idPlano = read idPlanoText :: Int
-                    preco = read precoText :: Float
-                    plano = Planos { idPlano = idPlano, nomePlano = nomePlano, descricao = descricao, preco = preco }
+                
+                let preco = read precoText :: Float
+                    plano = Planos { idPlano = 0, nomePlano = nomePlano, descricao = descricao, preco = preco }
                 conn <- open "db/academia.sqlite"
-                let query = fromString "INSERT INTO Planos (idPlano, nome, descricao, preco) VALUES (?, ?, ?, ?)" :: Query
-                execute conn query (idPlano, nomePlano, descricao, preco)
+                let query = fromString "INSERT INTO Planos (nome, descricao, preco) VALUES (?, ?, ?, ?)" :: Query
+                execute conn query (nomePlano, descricao, preco)
                 close conn
 
                 dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Plano Inserido!"

@@ -87,7 +87,7 @@ createTable alunos = do
 runApp :: IO()
 runApp = do 
     window <- windowNew
-    Gtk.set window [Gtk.windowTitle Gtk.:= "Academia", Gtk.containerBorderWidth Gtk.:= 10]
+    Gtk.set window [Gtk.windowTitle Gtk.:= "Alunos", Gtk.containerBorderWidth Gtk.:= 10]
 
     buttonInsert <- buttonNewWithLabel "Inserir novo Aluno"
         
@@ -121,7 +121,7 @@ mainInsert = do
     void initGUI
 
     window <- windowNew
-    Gtk.set window [ windowTitle Gtk.:= "Academia", containerBorderWidth Gtk.:= 10 ]
+    Gtk.set window [ windowTitle Gtk.:= "Inserir Aluno", containerBorderWidth Gtk.:= 10 ]
 
     -- Criar widgets
     nomeEntry <- entryNew
