@@ -2,8 +2,8 @@ module Aulas (main) where
 
 import Lib
 import Database.SQLite.Simple
-import Data.String (fromString)
 import Database.SQLite.Simple.FromRow
+import Data.String (fromString)
 import Graphics.UI.Gtk hiding (set)
 import qualified Graphics.UI.Gtk as Gtk
 import Control.Applicative  
@@ -18,7 +18,6 @@ main :: IO ()
 main = do
     void initGUI
     runApp
-
 
 createTable :: [Aulas] -> IO Widget
 createTable aulas = do
@@ -85,15 +84,9 @@ runApp = do
     Gtk.set window [Gtk.windowTitle Gtk.:= "Academia", Gtk.containerBorderWidth Gtk.:= 10]
 
     buttonInsert <- buttonNewWithLabel "Inserir nova Aula"
-    widgetSetSizeRequest buttonInsert 100 50
 
     box <- vBoxNew False 10
-    Gtk.set box [containerBorderWidth Gtk.:= 10, boxHomogeneous Gtk.:= True, boxSpacing Gtk.:= 10]
-
-
-    buttonInsert `on` buttonActivated $ do
-        widgetDestroy window
-        mainInsert
+    Gtk.set box [containerBorderWidth Gtk.:= 10, boxSpacing Gtk.:= 10]
 
     -- Cria a tabela
     conn <- open "db/academia.sqlite"
@@ -103,14 +96,17 @@ runApp = do
     close conn
 
     -- Adiciona a tabela e o botao de insert à box
-    containerAdd box buttonInsert
     containerAdd box table
-
+    containerAdd box buttonInsert
     containerAdd window box
 
     window `on` deleteEvent $ do
         liftIO mainQuit
         return False
+
+    buttonInsert `on` buttonActivated $ do
+        widgetDestroy window
+        mainInsert
 
     widgetShowAll window
     mainGUI
@@ -188,11 +184,4 @@ mainInsert = do
     widgetShowAll window
     mainGUI
 
--- Função auxiliar para adicionar uma label e uma entry a uma tabela
-addLabelAndEntry :: Table -> Int -> String -> Entry -> IO ()
-addLabelAndEntry table row label entry = do
-    labelWidget <- labelNew (Just label)
-    miscSetAlignment labelWidget 0 0.5
-    tableAttachDefaults table labelWidget 0 1 row (row + 1)
-    tableAttachDefaults table entry 1 2 row (row + 1)
 

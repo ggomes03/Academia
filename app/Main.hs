@@ -23,7 +23,7 @@ main = do
 
     Gtk.set window [Gtk.windowTitle Gtk.:= "Academia", Gtk.containerBorderWidth Gtk.:= 10]
     
-    -- window `on` sizeRequest $ return (Requisition 800 600) 
+    window `on` sizeRequest $ return (Requisition 400 400) 
             
 
     box <- vBoxNew False 10

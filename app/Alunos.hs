@@ -16,12 +16,17 @@ import Graphics.UI.Gtk hiding (Action, backspace)
 
 import Tipos
 
+main :: IO ()
+main = do
+    void initGUI
+    runApp
+
+
 -- Função para criar a tabela com os dados
 createTable :: [Aluno] -> IO Widget
 createTable alunos = do
     -- Cria o TreeView
     treeView <- treeViewNew
-
     -- Cria as colunas da tabela
     columnId <- treeViewColumnNew
     columnNome <- treeViewColumnNew
@@ -78,22 +83,16 @@ createTable alunos = do
     -- Retorna o TreeView como Widget
     return $ toWidget treeView
 
-main :: IO ()
-main = do
-    void initGUI
     
+runApp :: IO()
+runApp = do 
     window <- windowNew
     Gtk.set window [Gtk.windowTitle Gtk.:= "Academia", Gtk.containerBorderWidth Gtk.:= 10]
 
     buttonInsert <- buttonNewWithLabel "Inserir novo Aluno"
-    -- widgetSetSizeRequest buttonInsert 100 30
-
-    buttonInsert `on` buttonActivated $ do
-        widgetDestroy window
-        mainInsert
         
     box <- vBoxNew False 0 
-    Gtk.set box [containerBorderWidth Gtk.:= 10, boxHomogeneous Gtk.:= True, boxSpacing Gtk.:= 10]
+    Gtk.set box [containerBorderWidth Gtk.:= 10, boxSpacing Gtk.:= 1]
 
     conn <- open "db/academia.sqlite"
     let query = fromString "SELECT * FROM Alunos" :: Query
@@ -101,22 +100,21 @@ main = do
     table <- createTable results
     close conn 
 
-
-
-    boxPackStart box buttonInsert PackNatural 0
-
-    containerAdd box buttonInsert
+    -- containerAdd box buttonInsert
     containerAdd box table
+    boxPackStart box buttonInsert PackNatural 0
     containerAdd window box
 
     window `on` deleteEvent $ do
         liftIO mainQuit
         return False 
+
+    buttonInsert `on` buttonActivated $ do
+        widgetDestroy window
+        mainInsert
     
     widgetShowAll window
-
     mainGUI
-
 
 mainInsert :: IO ()
 mainInsert = do
@@ -126,29 +124,29 @@ mainInsert = do
     Gtk.set window [ windowTitle Gtk.:= "Academia", containerBorderWidth Gtk.:= 10 ]
 
     -- Criar widgets
-    -- idAlunoEntry <- entryNew
     nomeEntry <- entryNew
     dataNascimentoEntry <- entryNew
     emailEntry <- entryNew
     foneEntry <- entryNew
     inserirButton <- buttonNewWithLabel "Inserir"
+    backButton <- buttonNewWithLabel "Voltar"
 
     -- Criar layout
     vbox <- vBoxNew False 10
     containerAdd window vbox
     table <- tableNew 5 2 False
     boxPackStart vbox table PackGrow 0
+
     boxPackStart vbox inserirButton PackNatural 0
+    boxPackStart vbox backButton PackNatural 0
 
     -- Adicionar labels e entries à tabela
-    -- addLabelAndEntry table 0 "ID:" idAlunoEntry
     addLabelAndEntry table 1 "Nome:" nomeEntry
     addLabelAndEntry table 2 "Data de Nascimento:" dataNascimentoEntry
     addLabelAndEntry table 3 "Email:" emailEntry
     addLabelAndEntry table 4 "Telefone:" foneEntry
 
     inserirButton `on` buttonActivated $ do
-        -- idAlunoText <- entryGetText idAlunoEntry
         nome <- entryGetText nomeEntry >>= return . fromString
         dataNascimento <- entryGetText dataNascimentoEntry >>= return . fromString
         email <- entryGetText emailEntry >>= return . fromString
@@ -172,8 +170,9 @@ mainInsert = do
                 dialogRun dialog
                 widgetDestroy dialog
 
-
-                putStrLn "Inserido com sucesso!"
+    backButton `on` buttonActivated $ do
+        widgetDestroy window
+        main
 
     -- Configurar ação do fechamento da janela
     window `on` deleteEvent $ do
@@ -182,11 +181,3 @@ mainInsert = do
 
     widgetShowAll window
     mainGUI
-
--- Função auxiliar para adicionar uma label e uma entry a uma tabela
-addLabelAndEntry :: Table -> Int -> String -> Entry -> IO ()
-addLabelAndEntry table row label entry = do
-    labelWidget <- labelNew (Just label)
-    miscSetAlignment labelWidget 0 0.5
-    tableAttachDefaults table labelWidget 0 1 row (row + 1)
-    tableAttachDefaults table entry 1 2 row (row + 1)

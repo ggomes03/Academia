@@ -86,13 +86,10 @@ runApp = do
     Gtk.set window [Gtk.windowTitle Gtk.:= "Academia", Gtk.containerBorderWidth Gtk.:= 10]
 
     buttonInsert <- buttonNewWithLabel "Inserir nova frequencia"
-    widgetSetSizeRequest buttonInsert 100 50
 
     box <- vBoxNew False 10
-    Gtk.set box [containerBorderWidth Gtk.:= 10, boxHomogeneous Gtk.:= True, boxSpacing Gtk.:= 10]
+    Gtk.set box [containerBorderWidth Gtk.:= 10, boxSpacing Gtk.:= 10]
 
-    buttonInsert `on` buttonActivated $ do 
-        mainInsert
 
     -- Cria a tabela
     conn <- open "db/academia.sqlite"
@@ -102,14 +99,18 @@ runApp = do
     close conn
 
     -- Adiciona a tabela e o botao de insert à box
-    containerAdd box buttonInsert
     containerAdd box table
+    containerAdd box buttonInsert
 
     containerAdd window box 
     
     window `on` deleteEvent $ do
         liftIO mainQuit
         return False
+
+    buttonInsert `on` buttonActivated $ do 
+        widgetDestroy window
+        mainInsert
 
     -- widgetShow buttonInsert
     widgetShowAll window
@@ -129,6 +130,8 @@ mainInsert = do
     dataFrequenciaEntry <- entryNew
     indicPresenEntry <- entryNew
     inserirButton <- buttonNewWithLabel "Inserir"
+    backButton <- buttonNewWithLabel "Voltar"
+
 
     -- Criar layout
     vbox <- vBoxNew False 10
@@ -136,6 +139,8 @@ mainInsert = do
     table <- tableNew 5 2 False
     boxPackStart vbox table PackGrow 0
     boxPackStart vbox inserirButton PackNatural 0
+    boxPackStart vbox backButton PackNatural 0
+
 
     -- Adicionar labels e entries à tabela
     addLabelAndEntry table 1 "ID Aluno:" idAlunoEntry
@@ -172,13 +177,12 @@ mainInsert = do
         liftIO mainQuit
         return False
 
+    backButton `on` buttonActivated $ do
+		widgetDestroy window
+		liftIO mainQuit
+		main
+
     widgetShowAll window
     mainGUI
 
--- Função auxiliar para adicionar uma label e uma entry a uma tabela
-addLabelAndEntry :: Table -> Int -> String -> Entry -> IO ()
-addLabelAndEntry table row label entry = do
-    labelWidget <- labelNew (Just label)
-    miscSetAlignment labelWidget 0 0.5
-    tableAttachDefaults table labelWidget 0 1 row (row + 1)
-    tableAttachDefaults table entry 1 2 row (row + 1)
+
