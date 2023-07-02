@@ -87,12 +87,21 @@ runApp = do
     Gtk.set window [Gtk.windowTitle Gtk.:= "Frequencias", Gtk.containerBorderWidth Gtk.:= 10]
 
     buttonInsert <- buttonNewWithLabel "Inserir nova frequencia"
+
+
     verificarButton <- buttonNewWithLabel "Verificar Presença"
 
+    table <- tableNew 5 2 False
+    idAlunoEntry <- entryNew
+    dataFrequenciaEntry <- entryNew
+
+    addLabelAndEntry table 1 "ID Aluno:" idAlunoEntry
+    addLabelAndEntry table 2 "Data Frequencia:" dataFrequenciaEntry
 
     box <- vBoxNew False 10
     Gtk.set box [containerBorderWidth Gtk.:= 10, boxSpacing Gtk.:= 10]
 
+    boxPackStart box table PackGrow 0
     boxPackStart box verificarButton PackNatural 0
 
     -- Cria a tabela
@@ -116,9 +125,9 @@ runApp = do
         widgetDestroy window
         mainInsert
 
-    verificarButton `on` buttonActivated $ do 
-        widgetDestroy window
-        verifyFrequency
+    -- verificarButton `on` buttonActivated $ do 
+        
+        
 
     -- widgetShow buttonInsert
     widgetShowAll window
@@ -209,76 +218,5 @@ mainInsert = do
 
     
 
-    widgetShowAll window
-    mainGUI
-
-
-verifyFrequency :: IO ()
-verifyFrequency = do 
-    initGUI
-
-    window <- windowNew
-    Gtk.set window [ windowTitle Gtk.:= "Verificar Presença", containerBorderWidth Gtk.:= 10 ]
-
-    box <- vBoxNew False 10 
-
-    containerAdd window box
-
-    --campos de entrada de info
-    idAlunoEntry <- entryNew
-    dataFrequenciaEntry <- entryNew
-    
-    searchButton <- buttonNewWithLabel "Buscar"
-
-    table <- tableNew 5 2 False
-    boxPackStart box table PackGrow 0
-    boxPackStart box searchButton PackNatural 0
-
-    addLabelAndEntry table 1 "ID Aluno:" idAlunoEntry
-    addLabelAndEntry table 2 "Data Frequencia:" dataFrequenciaEntry
-
-    
-
-    searchButton `on` buttonActivated $ do 
-        widgetDestroy window
-
-        idAlunoValueStr <- entryGetText idAlunoEntry
-        let idAlunoValue = read idAlunoValueStr :: Int
-
-        dataFrequenciaValue <- entryGetText dataFrequenciaEntry
-
-        showFrequencyWindow idAlunoValue dataFrequenciaValue
-
-        
-
-    -- Configurar ação do fechamento da janela
-    window `on` deleteEvent $ do
-        liftIO mainQuit
-        return False
-
-    
-    widgetShowAll window
-    mainGUI
-
-
-showFrequencyWindow :: Int -> String -> IO ()
-showFrequencyWindow idAluno dataFrequencia  = do 
-
-    initGUI
-
-    window <- windowNew
-    Gtk.set window [ windowTitle Gtk.:= "Verificar Presença", containerBorderWidth Gtk.:= 10 ]
-
-    box <- vBoxNew False 10 
-
-    containerAdd window box
-
-    -- containerAdd box table
-
-    window `on` deleteEvent $ do
-        liftIO mainQuit
-        return False
-
-    
     widgetShowAll window
     mainGUI
