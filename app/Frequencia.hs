@@ -169,21 +169,27 @@ mainInsert = do
             then do
                 if tamanhoData /= 8 
                     then do 
-                        dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "erro: Data inválida, formato da data DDMMAAAA, !"
+                        dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "erro: Data inválida, formato da data DDMMAAAA!"
                         dialogRun dialog
                         widgetDestroy dialog
                     else do 
-                        let idAluno = fromJust maybeIdAluno
-                            frequencia = Frequencia { idFrequencia = 0, idAlunoFrequen = idAluno, dataFrequen = dataFrequencia, indicPresen = indicPresen }
-                        conn <- open "db/academia.sqlite"
-                        let query = fromString "INSERT INTO Frequencia (idAluno, dataFreq, indicPresen) VALUES ( ?, ?, ?)" :: Query
-                        execute conn query (idAluno, dataFrequencia, indicPresen)
-                        close conn
-                        putStrLn "Inserido com sucesso!"
+                        if indicPresen `notElem` ["N","S"] 
+                            then do 
+                                dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "erro: Caractere de Presença inválido!"
+                                dialogRun dialog
+                                widgetDestroy dialog
+                            else do 
+                                let idAluno = fromJust maybeIdAluno
+                                    frequencia = Frequencia { idFrequencia = 0, idAlunoFrequen = idAluno, dataFrequen = dataFrequencia, indicPresen = indicPresen }
+                                conn <- open "db/academia.sqlite"
+                                let query = fromString "INSERT INTO Frequencia (idAluno, dataFreq, indicPresen) VALUES ( ?, ?, ?)" :: Query
+                                execute conn query (idAluno, dataFrequencia, indicPresen)
+                                close conn
+                                putStrLn "Inserido com sucesso!"
 
-                        dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Frequencia Inserida!"
-                        dialogRun dialog
-                        widgetDestroy dialog
+                                dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Frequencia Inserida!"
+                                dialogRun dialog
+                                widgetDestroy dialog
             else do
                 dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Erro: Valores inválidos nos campos 'ID Aluno'."
                 Gtk.dialogRun dialog

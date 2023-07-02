@@ -152,6 +152,10 @@ mainInsert = do
         email <- entryGetText emailEntry >>= return . fromString
         fone <- entryGetText foneEntry >>= return . fromString
 
+        let tamanhoData = length dataNascimento
+
+
+
         if any null [nome, dataNascimento, email, fone]
             then do
                 -- Mostrar um diálogo de erro
@@ -159,16 +163,23 @@ mainInsert = do
                 dialogRun dialog
                 widgetDestroy dialog
             else do
-                -- let idAluno = read idAlunoText :: Int
-                let aluno = Aluno { idAluno = 0, nome = nome, dataNascimento = dataNascimento, email = email, fone = fone }
-                conn <- open "db/academia.sqlite"
-                let query = fromString "INSERT INTO Alunos (nome, dataNascimento, email, fone) VALUES (?, ?, ?, ?)" :: Query
-                execute conn query (nome, dataNascimento, email, fone)
-                close conn
 
-                dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Aluno Inserido!"
-                dialogRun dialog
-                widgetDestroy dialog
+                if tamanhoData /= 8
+                    then do 
+                        dialog <- messageDialogNew Nothing [] MessageError ButtonsClose "erro: Data inválida, formato da data DDMMAAAA!"
+                        dialogRun dialog
+                        widgetDestroy dialog
+                    else do 
+                        -- let idAluno = read idAlunoText :: Int
+                        let aluno = Aluno { idAluno = 0, nome = nome, dataNascimento = dataNascimento, email = email, fone = fone }
+                        conn <- open "db/academia.sqlite"
+                        let query = fromString "INSERT INTO Alunos (nome, dataNascimento, email, fone) VALUES (?, ?, ?, ?)" :: Query
+                        execute conn query (nome, dataNascimento, email, fone)
+                        close conn
+
+                        dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Aluno Inserido!"
+                        dialogRun dialog
+                        widgetDestroy dialog
 
     backButton `on` buttonActivated $ do
         widgetDestroy window
