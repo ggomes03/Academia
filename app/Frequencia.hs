@@ -33,18 +33,21 @@ createTable frequencia = do
     -- Cria as colunas da tabela
     columnIdFrequencia <- treeViewColumnNew
     columnIdAluno <- treeViewColumnNew
+    columnNomeAluno <- treeViewColumnNew
     columnDataFrequencia <- treeViewColumnNew
     columnIndicPresen <- treeViewColumnNew
 
     -- Adiciona as colunas ao TreeView
     treeViewAppendColumn treeView columnIdFrequencia
     treeViewAppendColumn treeView columnIdAluno
+    treeViewAppendColumn treeView columnNomeAluno
     treeViewAppendColumn treeView columnDataFrequencia
     treeViewAppendColumn treeView columnIndicPresen
 
     -- Define os títulos das colunas
     treeViewColumnSetTitle columnIdFrequencia "Id Frequencia"
     treeViewColumnSetTitle columnIdAluno "Id Aluno"
+    treeViewColumnSetTitle columnNomeAluno "Nome Aluno"
     treeViewColumnSetTitle columnDataFrequencia "Data"
     treeViewColumnSetTitle columnIndicPresen "Situação"
 
@@ -54,12 +57,14 @@ createTable frequencia = do
     -- Cria os CellRenderers para exibir os dados nas colunas
     rendererIdFrequencia <- cellRendererTextNew
     rendererIdAluno <- cellRendererTextNew
+    rendererNomeAluno <- cellRendererTextNew
     rendererDataFrequencia <- cellRendererTextNew
     rendererIndicPresen <- cellRendererTextNew
 
     -- Adiciona os CellRenderers às colunas
     treeViewColumnPackStart columnIdFrequencia rendererIdFrequencia True
     treeViewColumnPackStart columnIdAluno rendererIdAluno True
+    treeViewColumnPackStart columnNomeAluno rendererNomeAluno True
     treeViewColumnPackStart columnDataFrequencia rendererDataFrequencia True
     treeViewColumnPackStart columnIndicPresen rendererIndicPresen True
 
@@ -68,6 +73,8 @@ createTable frequencia = do
         [cellText Gtk.:= show (idFrequencia row)]
     cellLayoutSetAttributes columnIdAluno rendererIdAluno store $ \row ->
         [cellText Gtk.:= show (idAlunoFrequen row)]
+    cellLayoutSetAttributes columnNomeAluno rendererNomeAluno store $ \row ->
+        [cellText Gtk.:= show (nomeAluno row)]
     cellLayoutSetAttributes columnDataFrequencia rendererDataFrequencia store $ \row ->
         [cellText Gtk.:= dataFrequen row]
     cellLayoutSetAttributes columnIndicPresen rendererIndicPresen store $ \row ->
@@ -109,7 +116,7 @@ runApp = do
 
     -- Cria a tabela
     conn <- open "db/academia.sqlite"
-    let query = fromString "SELECT * FROM Frequencia" :: Query
+    let query = fromString "SELECT Frequencia.idFrequencia, Frequencia.idAluno, Alunos.nome, Frequencia.dataFreq, Frequencia.indicPresen FROM Frequencia, Alunos WHERE Alunos.idAluno = Frequencia.idAluno" :: Query
     results <- query_ conn query :: IO [Frequencia]
     table <- createTable results
     close conn
@@ -266,7 +273,8 @@ verificarPresen = do
             else do 
                 -- Cria a tabela
                 conn <- open "db/academia.sqlite"
-                let query = fromString ("SELECT * FROM Frequencia WHERE idAluno = " ++ idAlunotxt ++ " AND dataFreq = '" ++ dataFrequenciatxt ++ "'") :: Query
+                -- let query = fromString ("SELECT * FROM Frequencia WHERE idAluno = " ++ idAlunotxt ++ " AND dataFreq = '" ++ dataFrequenciatxt ++ "'") :: Query
+                let query = fromString ("SELECT Frequencia.idFrequencia, Frequencia.idAluno, Alunos.nome, Frequencia.dataFreq, Frequencia.indicPresen FROM Frequencia, Alunos WHERE Alunos.idAluno = Frequencia.idAluno AND dataFreq = '" ++ dataFrequenciatxt ++ "' AND Frequencia.idAluno = '" ++ idAlunotxt ++ "'") :: Query
                 resultsFiltro <- query_ conn query :: IO [Frequencia]
                 tableFiltro <- createTable resultsFiltro
                 close conn
@@ -340,7 +348,8 @@ verificarAusen = do
             else do 
                 -- Cria a tabela
                 conn <- open "db/academia.sqlite"
-                let query = fromString ("SELECT * FROM Frequencia WHERE indicPresen = 'N' AND dataFreq = '" ++ dataFrequenciatxt ++ "'") :: Query
+                -- let query = fromString ("SELECT  FROM Frequencia WHERE indicPresen = 'N' AND dataFreq = '" ++ dataFrequenciatxt ++ "'") :: Query
+                let query = fromString ("SELECT Frequencia.idFrequencia, Frequencia.idAluno, Alunos.nome, Frequencia.dataFreq, Frequencia.indicPresen FROM Frequencia, Alunos WHERE Alunos.idAluno = Frequencia.idAluno AND Frequencia.indicPresen = 'N' AND dataFreq = '" ++ dataFrequenciatxt ++ "'") :: Query
                 resultsFiltro <- query_ conn query :: IO [Frequencia]
                 tableFiltro <- createTable resultsFiltro
                 close conn

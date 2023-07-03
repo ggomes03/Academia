@@ -21,9 +21,9 @@ instance FromRow Planos where
 
 
 
-data Frequencia = Frequencia {idFrequencia :: Int, idAlunoFrequen :: Int, dataFrequen :: String, indicPresen :: String }
+data Frequencia = Frequencia {idFrequencia :: Int, idAlunoFrequen :: Int, nomeAluno :: String, dataFrequen :: String, indicPresen :: String }
 instance FromRow Frequencia where
-    fromRow = Frequencia <$> field <*> field <*> field <*> field
+    fromRow = Frequencia <$> field <*> field <*> field <*> field <*> field
 
 
 

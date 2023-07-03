@@ -84,6 +84,7 @@ runApp = do
     Gtk.set window [Gtk.windowTitle Gtk.:= "Aulas", Gtk.containerBorderWidth Gtk.:= 10]
 
     buttonInsert <- buttonNewWithLabel "Inserir nova Aula"
+    buttonAulas <- buttonNewWithLabel "Verificar Aulas"
 
     box <- vBoxNew False 10
     Gtk.set box [containerBorderWidth Gtk.:= 10, boxSpacing Gtk.:= 10]
@@ -98,11 +99,16 @@ runApp = do
     -- Adiciona a tabela e o botao de insert à box
     containerAdd box table
     containerAdd box buttonInsert
+    containerAdd box buttonAulas
     containerAdd window box
 
     window `on` deleteEvent $ do
         liftIO mainQuit
         return False
+
+    buttonAulas `on` buttonActivated $ do 
+        widgetDestroy window
+        verificarAula
 
     buttonInsert `on` buttonActivated $ do
         widgetDestroy window
@@ -184,4 +190,73 @@ mainInsert = do
     widgetShowAll window
     mainGUI
 
+verificarAula :: IO ()
+verificarAula = do 
+    window <- windowNew
+    Gtk.set window [Gtk.windowTitle Gtk.:= "Ausências", Gtk.containerBorderWidth Gtk.:= 10]
 
+    box <- vBoxNew False 10
+    Gtk.set box [containerBorderWidth Gtk.:= 10, boxSpacing Gtk.:= 10]
+
+    verificarButton <- buttonNewWithLabel "Verificar Aulas"
+    backButton <- buttonNewWithLabel "Voltar"
+
+    nomeInstrutorEntry <- entryNew
+
+    table <- tableNew 5 2 False
+
+    addLabelAndEntry table 2 "Nome instrutor:" nomeInstrutorEntry
+
+    boxPackStart box table PackGrow 0
+    boxPackStart box verificarButton PackNatural 0
+    boxPackStart box backButton PackNatural 0
+
+    tableFiltro <- createTable []
+    containerAdd box tableFiltro
+
+    verificarButton `on` buttonActivated $ do 
+        nomeInstrutortxt <- entryGetText nomeInstrutorEntry 
+
+        if null nomeInstrutortxt
+            then do 
+                dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Erro: Nome Vazio!"
+                Gtk.dialogRun dialog
+                Gtk.widgetDestroy dialog
+            else do 
+                -- Cria a tabela
+                conn <- open "db/academia.sqlite"
+                let query = fromString ("SELECT * FROM Aulas WHERE nomeInstrutor = '" ++ nomeInstrutortxt ++ "'") :: Query
+                resultsFiltro <- query_ conn query :: IO [Aulas]
+                tableFiltro <- createTable resultsFiltro
+                close conn
+
+                if null resultsFiltro
+                    then do 
+                        dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Instrutor sem Aulas!"
+                        Gtk.dialogRun dialog
+                        Gtk.widgetDestroy dialog
+                    else do 
+                        -- containerRemove box tableFiltro
+                        containerForeach box $ \childWidget -> containerRemove box childWidget
+
+                        boxPackStart box table PackGrow 0
+                        boxPackStart box verificarButton PackNatural 0
+                        boxPackStart box backButton PackNatural 0
+
+                        tableFiltro <- createTable resultsFiltro
+                        containerAdd box tableFiltro
+                        widgetShowAll tableFiltro
+               
+
+    window `on` deleteEvent $ do
+        liftIO mainQuit
+        return False
+
+    backButton `on` buttonActivated $ do
+		widgetDestroy window
+		main
+
+    containerAdd window box 
+
+    widgetShowAll window
+    mainGUI
