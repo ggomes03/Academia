@@ -133,14 +133,23 @@ runApp = do
 
     verificarButton `on` buttonActivated $ do 
         containerRemove box table
+        
+        idAlunotxt <- entryGetText idAlunoEntry 
+        dataFrequenciatxt <- entryGetText dataFrequenciaEntry 
+
+        -- Cria a tabela
+        conn <- open "db/academia.sqlite"
+        let query = fromString ("SELECT * FROM Frequencia WHERE idAluno = " ++ idAlunotxt ++ " AND dataFreq = " ++ dataFrequenciatxt)   :: Query
+        resultsFiltro <- query_ conn query :: IO [Frequencia]
+        tableFiltro <- createTable resultsFiltro
+
+        close conn
 
 
+        tableFiltro <- createTable resultsFiltro
 
-
-        -- tableFiltro <- createTable resultsFiltro
-
-        -- containerAdd box tableFiltro
-        -- widgetShowAll tableFiltro
+        containerAdd box tableFiltro
+        widgetShowAll tableFiltro
         
     widgetShowAll window
     mainGUI
