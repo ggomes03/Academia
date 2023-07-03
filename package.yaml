@@ -49,6 +49,7 @@ executables:
     - academia
     - sqlite-simple
     - gtk
+    - text 
 
 tests:
   academia-test:
@@ -62,3 +63,4 @@ tests:
     - academia
     - sqlite-simple
     - gtk
+    - text

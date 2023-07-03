@@ -1,9 +1,13 @@
 module Frequencia (main) where
 
 import Lib
+import qualified Database.SQLite.Simple as SQL
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow
+import Database.SQLite.Simple.ToRow
+import Database.SQLite.Simple.ToField
 import Data.String (fromString)
+import qualified Data.Text as T
 import Data.Char (toUpper)
 import Graphics.UI.Gtk hiding (set)
 import qualified Graphics.UI.Gtk as Gtk
@@ -15,6 +19,7 @@ import Control.Monad (void)
 import Text.Read (readMaybe)
 import Data.Maybe (isJust, fromJust)
 import System.IO.Error (ioeGetErrorString)
+
 
 import Tipos
 
@@ -103,6 +108,7 @@ runApp = do
 
     boxPackStart box table PackGrow 0
     boxPackStart box verificarButton PackNatural 0
+    boxPackStart box buttonInsert PackNatural 0
 
     -- Cria a tabela
     conn <- open "db/academia.sqlite"
@@ -113,7 +119,7 @@ runApp = do
 
     -- Adiciona a tabela e o botao de insert à box
     containerAdd box table
-    containerAdd box buttonInsert
+    -- containerAdd box buttonInsert
 
     containerAdd window box 
     
@@ -125,11 +131,17 @@ runApp = do
         widgetDestroy window
         mainInsert
 
-    -- verificarButton `on` buttonActivated $ do 
-        
-        
+    verificarButton `on` buttonActivated $ do 
+        containerRemove box table
 
-    -- widgetShow buttonInsert
+
+
+
+        -- tableFiltro <- createTable resultsFiltro
+
+        -- containerAdd box tableFiltro
+        -- widgetShowAll tableFiltro
+        
     widgetShowAll window
     mainGUI
 
