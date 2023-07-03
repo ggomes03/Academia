@@ -156,7 +156,7 @@ mainInsert = do
                 let preco = read precoText :: Float
                     plano = Planos { idPlano = 0, nomePlano = nomePlano, descricao = descricao, preco = preco }
                 conn <- open "db/academia.sqlite"
-                let query = fromString "INSERT INTO Planos (nome, descricao, preco) VALUES (?, ?, ?, ?)" :: Query
+                let query = fromString "INSERT INTO Planos (nome, descricao, preco) VALUES ( ?, ?, ?)" :: Query
                 execute conn query (nomePlano, descricao, preco)
                 close conn
 
