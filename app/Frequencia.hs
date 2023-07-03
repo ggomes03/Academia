@@ -95,20 +95,17 @@ runApp = do
 
 
     verificarButton <- buttonNewWithLabel "Verificar Presença"
+    verificarAusenButton <- buttonNewWithLabel "Verificar Ausência"
 
     table <- tableNew 5 2 False
-    idAlunoEntry <- entryNew
-    dataFrequenciaEntry <- entryNew
-
-    addLabelAndEntry table 1 "ID Aluno:" idAlunoEntry
-    addLabelAndEntry table 2 "Data Frequencia:" dataFrequenciaEntry
-
+    
     box <- vBoxNew False 10
     Gtk.set box [containerBorderWidth Gtk.:= 10, boxSpacing Gtk.:= 10]
 
     boxPackStart box table PackGrow 0
-    boxPackStart box verificarButton PackNatural 0
     boxPackStart box buttonInsert PackNatural 0
+    boxPackStart box verificarButton PackNatural 0
+    boxPackStart box verificarAusenButton PackNatural 0
 
     -- Cria a tabela
     conn <- open "db/academia.sqlite"
@@ -123,6 +120,14 @@ runApp = do
 
     containerAdd window box 
     
+    verificarButton `on` buttonActivated $ do 
+        widgetDestroy window
+        verificarPresen
+    
+    verificarAusenButton `on` buttonActivated $ do 
+        widgetDestroy window
+        verificarAusen
+
     window `on` deleteEvent $ do
         liftIO mainQuit
         return False
@@ -131,25 +136,6 @@ runApp = do
         widgetDestroy window
         mainInsert
 
-    verificarButton `on` buttonActivated $ do 
-        containerRemove box table
-        
-        idAlunotxt <- entryGetText idAlunoEntry 
-        dataFrequenciatxt <- entryGetText dataFrequenciaEntry 
-
-        -- Cria a tabela
-        conn <- open "db/academia.sqlite"
-        let query = fromString ("SELECT * FROM Frequencia WHERE idAluno = " ++ idAlunotxt ++ " AND dataFreq = " ++ dataFrequenciatxt)   :: Query
-        resultsFiltro <- query_ conn query :: IO [Frequencia]
-        tableFiltro <- createTable resultsFiltro
-
-        close conn
-
-
-        tableFiltro <- createTable resultsFiltro
-
-        containerAdd box tableFiltro
-        widgetShowAll tableFiltro
         
     widgetShowAll window
     mainGUI
@@ -221,11 +207,10 @@ mainInsert = do
                                 dialogRun dialog
                                 widgetDestroy dialog
             else do
-                dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Erro: Valores inválidos nos campos 'ID Aluno'."
+                dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Erro: Campos Vazios"
                 Gtk.dialogRun dialog
                 Gtk.widgetDestroy dialog
 
-    
 
     -- Configurar ação do fechamento da janela
     window `on` deleteEvent $ do
@@ -238,6 +223,155 @@ mainInsert = do
 		main
 
     
+
+    widgetShowAll window
+    mainGUI
+
+verificarPresen :: IO ()
+verificarPresen = do 
+
+    window <- windowNew
+    Gtk.set window [Gtk.windowTitle Gtk.:= "Frequencias", Gtk.containerBorderWidth Gtk.:= 10]
+
+    box <- vBoxNew False 10
+    Gtk.set box [containerBorderWidth Gtk.:= 10, boxSpacing Gtk.:= 10]
+
+    verificarButton <- buttonNewWithLabel "Verificar Presença"
+    backButton <- buttonNewWithLabel "Voltar"
+
+    idAlunoEntry <- entryNew
+    dataFrequenciaEntry <- entryNew
+
+    table <- tableNew 5 2 False
+
+    addLabelAndEntry table 1 "ID Aluno:" idAlunoEntry
+    addLabelAndEntry table 2 "Data:" dataFrequenciaEntry
+
+    boxPackStart box table PackGrow 0
+    boxPackStart box verificarButton PackNatural 0
+    boxPackStart box backButton PackNatural 0
+
+    tableFiltro <- createTable []
+    containerAdd box tableFiltro
+
+    verificarButton `on` buttonActivated $ do 
+        idAlunotxt <- entryGetText idAlunoEntry 
+        dataFrequenciatxt <- entryGetText dataFrequenciaEntry 
+
+        if null idAlunotxt || null dataFrequenciatxt
+            then do 
+                dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Erro: Campos Vazios"
+                Gtk.dialogRun dialog
+                Gtk.widgetDestroy dialog
+            else do 
+                -- Cria a tabela
+                conn <- open "db/academia.sqlite"
+                let query = fromString ("SELECT * FROM Frequencia WHERE idAluno = " ++ idAlunotxt ++ " AND dataFreq = '" ++ dataFrequenciatxt ++ "'") :: Query
+                resultsFiltro <- query_ conn query :: IO [Frequencia]
+                tableFiltro <- createTable resultsFiltro
+                close conn
+
+                if null resultsFiltro 
+                    then do
+                        dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "O aluno não frequentou nesta data! "
+                        Gtk.dialogRun dialog
+                        Gtk.widgetDestroy dialog
+                    else do
+                        -- containerRemove box tableFiltro
+                        containerForeach box $ \childWidget -> containerRemove box childWidget
+
+                        boxPackStart box table PackGrow 0
+                        boxPackStart box verificarButton PackNatural 0
+                        boxPackStart box backButton PackNatural 0
+
+                        tableFiltro <- createTable resultsFiltro
+                        containerAdd box tableFiltro
+                        widgetShowAll tableFiltro
+
+    window `on` deleteEvent $ do
+        liftIO mainQuit
+        return False
+
+    backButton `on` buttonActivated $ do
+		widgetDestroy window
+		main
+
+
+
+    containerAdd window box 
+
+    widgetShowAll window
+    mainGUI
+
+
+verificarAusen :: IO ()
+verificarAusen = do 
+
+    window <- windowNew
+    Gtk.set window [Gtk.windowTitle Gtk.:= "Ausências", Gtk.containerBorderWidth Gtk.:= 10]
+
+    box <- vBoxNew False 10
+    Gtk.set box [containerBorderWidth Gtk.:= 10, boxSpacing Gtk.:= 10]
+
+    verificarButton <- buttonNewWithLabel "Verificar Ausência"
+    backButton <- buttonNewWithLabel "Voltar"
+
+    dataFrequenciaEntry <- entryNew
+
+    table <- tableNew 5 2 False
+
+    addLabelAndEntry table 2 "Data:" dataFrequenciaEntry
+
+    boxPackStart box table PackGrow 0
+    boxPackStart box verificarButton PackNatural 0
+    boxPackStart box backButton PackNatural 0
+
+    tableFiltro <- createTable []
+    containerAdd box tableFiltro
+
+    verificarButton `on` buttonActivated $ do 
+        dataFrequenciatxt <- entryGetText dataFrequenciaEntry 
+
+        if null dataFrequenciatxt
+            then do 
+                dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Erro: Data Vazia"
+                Gtk.dialogRun dialog
+                Gtk.widgetDestroy dialog
+            else do 
+                -- Cria a tabela
+                conn <- open "db/academia.sqlite"
+                let query = fromString ("SELECT * FROM Frequencia WHERE indicPresen = 'N' AND dataFreq = '" ++ dataFrequenciatxt ++ "'") :: Query
+                resultsFiltro <- query_ conn query :: IO [Frequencia]
+                tableFiltro <- createTable resultsFiltro
+                close conn
+
+                if null resultsFiltro
+                    then do 
+                        dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Data sem Ausências"
+                        Gtk.dialogRun dialog
+                        Gtk.widgetDestroy dialog
+                    else do 
+                        -- containerRemove box tableFiltro
+                        containerForeach box $ \childWidget -> containerRemove box childWidget
+
+                        boxPackStart box table PackGrow 0
+                        boxPackStart box verificarButton PackNatural 0
+                        boxPackStart box backButton PackNatural 0
+
+                        tableFiltro <- createTable resultsFiltro
+                        containerAdd box tableFiltro
+                        widgetShowAll tableFiltro
+               
+
+    window `on` deleteEvent $ do
+        liftIO mainQuit
+        return False
+
+    backButton `on` buttonActivated $ do
+		widgetDestroy window
+		main
+
+    containerAdd window box 
 
     widgetShowAll window
     mainGUI
