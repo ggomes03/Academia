@@ -164,16 +164,23 @@ mainInsert = do
                 dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Erro: Nenhum campo pode estar vazio"
                 Gtk.dialogRun dialog
                 Gtk.widgetDestroy dialog
-                putStrLn "Erro: Todos os campos devem ser preenchidos."
+                
             else do
-                let aula = Aulas { idAula = 0, nomeAula = nomeAula, nomeInstrutor = nomeInstrutor, horarioAula = horarioAula }
-                conn <- open "db/academia.sqlite"
-                let query = fromString "INSERT INTO Aulas ( nomeAula, nomeInstrutor, horarioAula) VALUES ( ?, ?, ?)" :: Query
-                execute conn query ( nomeAula, nomeInstrutor, horarioAula)
-                close conn
-                dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Aula Inserida!"
-                dialogRun dialog
-                widgetDestroy dialog
+
+                if horarioAula > 23 || horarioAula <= 0
+                    then do 
+                        dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Erro: Horario da Aula inválido, Só há horarios disponíveis de 0 a 23!"
+                        Gtk.dialogRun dialog
+                        Gtk.widgetDestroy dialog
+                    else do 
+                        let aula = Aulas { idAula = 0, nomeAula = nomeAula, nomeInstrutor = nomeInstrutor, horarioAula = horarioAula }
+                        conn <- open "db/academia.sqlite"
+                        let query = fromString "INSERT INTO Aulas ( nomeAula, nomeInstrutor, horarioAula) VALUES ( ?, ?, ?)" :: Query
+                        execute conn query ( nomeAula, nomeInstrutor, horarioAula)
+                        close conn
+                        dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Aula Inserida!"
+                        dialogRun dialog
+                        widgetDestroy dialog
             
 
     backButton `on` buttonActivated $ do
