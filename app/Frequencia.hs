@@ -202,17 +202,27 @@ mainInsert = do
                                 dialogRun dialog
                                 widgetDestroy dialog
                             else do 
+
                                 let idAluno = fromJust maybeIdAluno
                                     frequencia = Frequencia { idFrequencia = 0, idAlunoFrequen = idAluno, dataFrequen = dataFrequencia, indicPresen = indicPresen }
                                 conn <- open "db/academia.sqlite"
-                                let query = fromString "INSERT INTO Frequencia (idAluno, dataFreq, indicPresen) VALUES ( ?, ?, ?)" :: Query
-                                execute conn query (idAluno, dataFrequencia, indicPresen)
-                                close conn
-                                putStrLn "Inserido com sucesso!"
+                                let queryAux = fromString "SELECT idAluno FROM Alunos" :: Query
+                                resultsAlunos <- query_ conn queryAux :: IO [AlunoAux]
+                                let idAlunos = map idAlunoAux resultsAlunos :: [Int] 
+                                if read idAlunoStr `notElem` idAlunos
+                                    then do 
+                                        dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "erro: Id Inválido!"
+                                        dialogRun dialog
+                                        widgetDestroy dialog
+                                    else do 
+                                        let query = fromString "INSERT INTO Frequencia (idAluno, dataFreq, indicPresen) VALUES ( ?, ?, ?)" :: Query
+                                        execute conn query (idAluno, dataFrequencia, indicPresen)
+                                        close conn
+                                        putStrLn "Inserido com sucesso!"
 
-                                dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Frequencia Inserida!"
-                                dialogRun dialog
-                                widgetDestroy dialog
+                                        dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Frequencia Inserida!"
+                                        dialogRun dialog
+                                        widgetDestroy dialog
             else do
                 dialog <- Gtk.messageDialogNew Nothing [Gtk.DialogModal, Gtk.DialogDestroyWithParent] Gtk.MessageError Gtk.ButtonsOk "Erro: Campos Vazios"
                 Gtk.dialogRun dialog

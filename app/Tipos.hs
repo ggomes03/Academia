@@ -25,7 +25,9 @@ data Frequencia = Frequencia {idFrequencia :: Int, idAlunoFrequen :: Int, nomeAl
 instance FromRow Frequencia where
     fromRow = Frequencia <$> field <*> field <*> field <*> field <*> field
 
-
+data AlunoAux = AlunoAux {idAlunoAux :: Int}
+instance FromRow AlunoAux where
+    fromRow = AlunoAux <$> field
 
 data Aulas = Aulas {idAula :: Int, nomeAula :: String, nomeInstrutor :: String, horarioAula :: Int}
 instance FromRow Aulas where

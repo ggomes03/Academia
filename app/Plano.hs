@@ -9,6 +9,8 @@ import Database.SQLite.Simple
 import Data.String (fromString)
 import Database.SQLite.Simple.FromRow
 import Graphics.UI.Gtk hiding (set)
+import Data.Maybe (isJust)
+import Text.Read (readMaybe)
 import qualified Graphics.UI.Gtk as Gtk
 
 import Tipos
@@ -152,18 +154,25 @@ mainInsert = do
                 dialogRun dialog
                 widgetDestroy dialog
             else do
-                
-                let preco = read precoText :: Float
-                    plano = Planos { idPlano = 0, nomePlano = nomePlano, descricao = descricao, preco = preco }
-                conn <- open "db/academia.sqlite"
-                let query = fromString "INSERT INTO Planos (nome, descricao, preco) VALUES ( ?, ?, ?)" :: Query
-                execute conn query (nomePlano, descricao, preco)
-                close conn
+                let precoMaybe = readMaybe precoText :: Maybe Float
+                if isJust precoMaybe
+                    then do 
+                        let preco = read precoText :: Float
+                            plano = Planos { idPlano = 0, nomePlano = nomePlano, descricao = descricao, preco = preco }
+                        conn <- open "db/academia.sqlite"
+                        let query = fromString "INSERT INTO Planos (nome, descricao, preco) VALUES ( ?, ?, ?)" :: Query
+                        execute conn query (nomePlano, descricao, preco)
+                        close conn
 
-                dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Plano Inserido!"
-                dialogRun dialog
-                widgetDestroy dialog
-                putStrLn "Inserido com sucesso!"
+                        dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "Plano Inserido!"
+                        dialogRun dialog
+                        widgetDestroy dialog
+                        putStrLn "Inserido com sucesso!"
+                    else do
+                         -- Mostrar um diálogo de erro
+                        dialog <- messageDialogNew Nothing [] MessageError ButtonsClose "Preço inválido!"
+                        dialogRun dialog
+                        widgetDestroy dialog
 
 
     -- Configurar ação do fechamento da janela
