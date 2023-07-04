@@ -189,7 +189,7 @@ mainInsert = do
         let maybeIdAluno = readMaybe idAlunoStr :: Maybe Int
 
         if isJust maybeIdAluno
-            then do
+            then do 
                 if tamanhoData /= 8 
                     then do 
                         dialog <- messageDialogNew Nothing [] MessageInfo ButtonsClose "erro: Data inválida, formato da data DDMMAAAA!"
